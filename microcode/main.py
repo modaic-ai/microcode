@@ -34,7 +34,7 @@ DEFAULT_HISTORY_LIMIT = 5
 app = typer.Typer(add_completion=False, help="Microcode interactive CLI.")
 BANNER_ART = """
                       ▓██████▓                                          
-                    ░██████████░                                        
+                    ░██████████░            microcode                            
             ▒█▒     ████████████                                        
              ▓▓    ▓████████████▓                                       
             ▓█▒    ▓█████████████      ░▓▓▓▒                            
@@ -46,7 +46,7 @@ BANNER_ART = """
      ▓▓     ▒█████████████████████▓   ▒███▒                             
      ▓▒        ░▓████████████████████████▒                              
               ██████▓▓██████████▒  ░░░░                                 
-             ▓██▒   ░███▓ ███▒▓██▓                                      
+             ▓██▒   ░███▓ ███▒▓██▓           powered by modaic                                
              ▓██   ▓██▓    ▓██░▒█████████▓                              
        ▒▒   ▓██▒  ███       ░██▓  ░▒▒░  ░█▒                             
          ▓████▒   ██▒        ███                                        
@@ -174,12 +174,9 @@ def print_banner(
         "",
         f"{DIM}Settings:{RESET}",
         f"  {DIM}max_turns:{RESET} {history_limit}",
-        f"  {DIM}max_iterations:{RESET} {format_setting(max_iterations)}",
         f"  {DIM}max_tokens:{RESET} {format_setting(max_tokens)}",
-        f"  {DIM}max_output_chars:{RESET} {format_setting(max_output_chars)}",
         f"  {DIM}verbose:{RESET} {format_setting(verbose)}",
         f"  {DIM}cwd:{RESET} {cwd}",
-        f"  {DIM}env:{RESET} {env}" if env else "",
         "",
         f"{DIM}Quick commands:{RESET}",
         f"  {BLUE}/help - help{RESET}",
@@ -187,7 +184,6 @@ def print_banner(
         f"  {BLUE}/key - set API key{RESET}",
         f"  {BLUE}/c - clear conversation{RESET}",
         f"  {BLUE}/q - quit{RESET}",
-        f"  {BLUE}/mcp - manage MCP servers{RESET}",
     ]
 
     total_lines = max(len(art_lines), len(right_lines))
