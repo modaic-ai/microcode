@@ -113,7 +113,7 @@ def select_model() -> str:
 
     while True:
         selection = prompt_model_tui(
-            "Select a model",
+            "Select a base RLM model:",
             _build_model_options(include_custom=True),
         )
 
@@ -157,7 +157,7 @@ def select_sub_model(primary_model: str) -> str:
 
     while True:
         selection = prompt_model_tui(
-            "Select a sub model:",
+            "Select the RLM's sub model (usually a smaller, faster model than the base):",
             _build_model_options(include_custom=True, include_primary=True),
         )
 
@@ -290,7 +290,7 @@ def handle_model_command(
 
     new_model = agent.config.lm
     model_selection = prompt_model_tui(
-        "Select a new RLM(model):",
+        "Select a base RLM model:",
         _build_model_options(include_custom=True, include_keep=True),
     )
 
@@ -331,7 +331,7 @@ def handle_model_command(
         print(f"{GREEN}⏺ Selected: {name} ({new_model}){RESET}")
 
     sub_selection = prompt_model_tui(
-        "Select a sub model:",
+        "Select the RLM's sub model (usually a smaller, faster model than the base):",
         _build_model_options(
             include_custom=True,
             include_keep=True,
@@ -388,7 +388,7 @@ def handle_model_command(
         info["tools"] = register_mcp_server(agent, server_name, info["server"])
 
     save_model_config(normalize_model_id(new_model), new_sub_lm)
-    print(
+    click.echo(
         f"{GREEN}⏺ Switched to: {normalize_model_id(new_model)} | sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}"
     )
     return True, agent, new_sub_lm
