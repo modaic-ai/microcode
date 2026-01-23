@@ -16,6 +16,10 @@ _PLACEHOLDER_RE = re.compile(r"^\[pasted \d+\+ chars\]$")
 
 
 class _PlaceholderLexer(Lexer):
+    """
+    Lexer for highlighting paste placeholders in the prompt.
+    """
+
     def lex_document(self, document):
         lines = document.lines
 
@@ -29,6 +33,12 @@ class _PlaceholderLexer(Lexer):
 
 
 def _get_session() -> PromptSession | None:
+    """
+    Get or create a PromptSession instance for handling paste events.
+
+    Returns:
+        A PromptSession instance or None if prompt_toolkit is not available
+    """
     global _SESSION
     if PromptSession is None:
         return None
@@ -75,6 +85,15 @@ def _get_session() -> PromptSession | None:
 def read_user_input(
     prompt: str,
 ) -> str:
+    """
+    Read user input with support for paste events.
+
+    Args:
+        prompt: The prompt to display to the user
+
+    Returns:
+        The user input as a string
+    """
     if not sys.stdin.isatty():
         if prompt:
             click.echo(prompt, nl=False)
@@ -100,6 +119,15 @@ def read_user_input(
 
 
 def consume_paste_for_input(user_input: str) -> dict | None:
+    """
+    Consume the last paste event for the given user input.
+
+    Args:
+        user_input: The user input string
+
+    Returns:
+        The paste payload or None if no paste event was found
+    """
     global _LAST_PASTE
     if _LAST_PASTE is None:
         return None
@@ -113,10 +141,20 @@ def consume_paste_for_input(user_input: str) -> dict | None:
 
 
 def _store_paste(text: str, placeholder: str) -> None:
+    """
+    Store a paste event for later retrieval.
+
+    Args:
+        text: The pasted text
+        placeholder: The placeholder string to replace in user input
+    """
     global _LAST_PASTE
     _LAST_PASTE = {"text": text, "placeholder": placeholder}
 
 
 def _clear_paste() -> None:
+    """
+    Clear the last paste event.
+    """
     global _LAST_PASTE
     _LAST_PASTE = None

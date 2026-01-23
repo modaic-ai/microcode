@@ -11,6 +11,7 @@ dependencies = [
     "mcp2py>=0.6.0",
     "modaic>=0.10.4",
     "prompt-toolkit>=3.0.52",
+    "pytz>=2025.2",
     "rich>=14.2.0",
     "textual>=7.3.0",
     "typer>=0.21.1",
@@ -28,9 +29,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://modaic.dev/farouk1/nanocode"
-Repository = "https://github.com/Fadeleke57/nanocode"
-Issues = "https://github.com/Fadeleke57/nanocode/issues"
+Homepage = "https://modaic.dev/"
+Repository = "https://github.com/modaic-ai/microcode"
+Issues = "https://github.com/modaic-ai/microcode/issues"
 
 [project.scripts]
 microcode = "main:main"

@@ -5,10 +5,21 @@ from typing import Any
 
 from modaic import PrecompiledProgram
 
-from .display import GREEN, RED, RESET, YELLOW
+from .constants import GREEN, RED, RESET, YELLOW
 
 
 def register_mcp_server(agent: PrecompiledProgram, name: str, server: Any) -> list[str]:
+    """
+    Register MCP server tools with the agent.
+
+    Args:
+        agent: The PrecompiledProgram agent to register tools with
+        name: The name of the MCP server
+        server: The MCP server object with tools
+
+    Returns:
+        List of registered tool names
+    """
     assert isinstance(name, str), "name must be a str"
     assert isinstance(agent, PrecompiledProgram), "agent must be PrecompiledProgram"
     assert hasattr(server, "tools"), "server must expose tools"
@@ -24,18 +35,26 @@ def register_mcp_server(agent: PrecompiledProgram, name: str, server: Any) -> li
 def handle_add_mcp_command(
     user_input: str, agent: PrecompiledProgram, mcp_servers: dict[str, dict[str, Any]]
 ) -> bool:
+    """
+    Handle the /mcp add command.
+
+    Args:
+        user_input: The user input string
+        agent: The PrecompiledProgram agent
+        mcp_servers: Dictionary of registered MCP servers
+
+    Returns:
+        True if command was handled, False otherwise
+    """
     assert isinstance(user_input, str), "user_input must be a str"
     assert isinstance(agent, PrecompiledProgram), "agent must be PrecompiledProgram"
     assert isinstance(mcp_servers, dict), "mcp_servers must be a dict"
-
-    if not user_input.startswith("/add-mcp"):
-        return False
 
     parts = shlex.split(user_input)
     args = parts[1:]
     if not args:
         print(
-            f"{YELLOW}⏺ Usage: /add-mcp <name> <server> [--auth <auth>|--oauth] [--headers '<json>'] [--auto-auth|--no-auto-auth]{RESET}"
+            f"{YELLOW}⏺ Usage: /mcp <name> <server> [--auth <auth>|--oauth] [--headers '<json>'] [--auto-auth|--no-auto-auth]{RESET}"
         )
         return True
 
@@ -84,7 +103,7 @@ def handle_add_mcp_command(
 
     if not server_cmd:
         print(
-            f"{YELLOW}⏺ Usage: /add-mcp <name> <server> [--auth <auth>|--oauth] [--headers '<json>'] [--auto-auth|--no-auto-auth]{RESET}"
+            f"{YELLOW}⏺ Usage: /mcp <name> <server> [--auth <auth>|--oauth] [--headers '<json>'] [--auto-auth|--no-auto-auth]{RESET}"
         )
         return True
 
