@@ -23,35 +23,16 @@ from utils.constants import (
     GREEN,
     RED,
     RESET,
+    BANNER_ART,
+    MODAIC_REPO_PATH,
+    DEFAULT_HISTORY_LIMIT,
 )
 from utils.display import render_markdown, separator
 from utils.models import handle_model_command, resolve_startup_models
 from utils.mcp import handle_add_mcp_command, register_mcp_server
 from utils.paste import consume_paste_for_input, read_user_input
 
-MODAIC_REPO_PATH = "farouk1/nanocode"
-DEFAULT_HISTORY_LIMIT = 5
 app = typer.Typer(add_completion=False, help="Microcode interactive CLI.")
-BANNER_ART = """
-                      ▓██████▓                                          
-                    ░██████████░            microcode                            
-            ▒█▒     ████████████                                        
-             ▓▓    ▓████████████▓                                       
-            ▓█▒    ▓█████████████      ░▓▓▓▒                            
-           ▒██     ▓████████████▒     ██▓░ ░▓▓░                         
-           ▒██▓     ▓███████████     ██▓                                
-            ▓███▓    ▓█████████    ▒███▓  ▒██░                          
-       ▓███▒  ██████▒▒████████▓▒██████▓  ▓█▓ ▒▓                         
-     ▒█████████▒▓███████████████████▒   ▓█▓                             
-     ▓▓     ▒█████████████████████▓   ▒███▒                             
-     ▓▒        ░▓████████████████████████▒                              
-              ██████▓▓██████████▒  ░░░░                                 
-             ▓██▒   ░███▓ ███▒▓██▓           powered by modaic                                
-             ▓██   ▓██▓    ▓██░▒█████████▓                              
-       ▒▒   ▓██▒  ███       ░██▓  ░▒▒░  ░█▒                             
-         ▓████▒   ██▒        ███                                        
-                  ▒███▒    ▓██▓                                         
-""".strip("\n")
 
 
 def format_auth_error(err: Exception) -> str | None:
@@ -166,7 +147,7 @@ def print_banner(
         return f"\033[38;2;{r};{g};{b}m"
 
     right_lines = [
-        f"{BOLD}{BLUE}MICROCODE -{RESET} {DIM}AN EFFICIENT RLM TERMINAL AGENT{RESET}",
+        f"{BOLD}{BLUE}MICROCODE -{RESET} {DIM}An Efficient RLM Terminal Agent{RESET}",
         "",
         f"{DIM}RLM:{RESET}",
         f"  {DIM}model:{RESET} {model.removeprefix('openrouter/')}",
