@@ -1,0 +1,8 @@
+microcode.egg-info
+nanocode.egg-info
+__pycache__
+.venv
+.env
+dist
+build
+/tmp
