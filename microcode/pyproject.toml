@@ -1,6 +1,6 @@
 [project]
 name = "microcode"
-version = "0.1.4"
+version = "0.1.6"
 description = "Minimal Claude Code CLI powered by Modaic + DSPy RLM's"
 readme = "README.md"
 requires-python = ">=3.13"

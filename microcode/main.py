@@ -244,15 +244,10 @@ def run_interactive(
 
             task = f"Current task: {user_input}\n{context}\n"
 
-            with open("debug.txt", "w") as f:
-                f.write(task)
-
             click.echo(f"\n{CYAN}⏺{RESET} Thinking...", nl=True)
-
             result = agent(task=task)
 
             click.echo(f"\n{CYAN}⏺{RESET} {render_markdown(result.answer)}")
-            # click.echo(f"\n{MAGENTA}⏺ Affected files: {result.affected_files}{RESET}")
 
             history.append({"user": user_input, "assistant": result.answer})
             click.echo()
