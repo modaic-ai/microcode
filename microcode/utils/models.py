@@ -71,10 +71,13 @@ def _build_model_options(
         Option(f"{name} ({model_id})", id=model_id)
         for name, model_id in AVAILABLE_MODELS.values()
     ]
+
     if include_primary:
         options.append(Option("Use primary model", id=PRIMARY_OPTION))
+
     if include_custom:
         options.append(Option("Custom model (enter manually)", id=CUSTOM_OPTION))
+
     if include_keep:
         options.append(Option("Keep current model", id=KEEP_OPTION))
     return options
@@ -89,9 +92,11 @@ def select_model() -> str:
             "Select a model",
             _build_model_options(include_custom=True),
         )
+
         if selection is None:
             click.echo(f"{RED}⏺ Model selection cancelled{RESET}")
             exit(1)
+
         if selection == CUSTOM_OPTION:
             custom_model = click.prompt(
                 "Enter model ID (e.g., openai/gpt-4)",
@@ -109,6 +114,7 @@ def select_model() -> str:
             for name, model_id in AVAILABLE_MODELS.values()
             if model_id == selection
         )
+
         click.echo(f"{GREEN}⏺ Selected: {name}{RESET}")
         return selection
 
@@ -125,9 +131,8 @@ def resolve_startup_models() -> tuple[str, str]:
         model = model_env
 
     elif cached_model:
-        print(f"{GREEN}⏺ Using cached model: {cached_model}{RESET}")
         model = cached_model
-        
+
     else:
         model = select_model()
         normalized_model = normalize_model_id(model)
@@ -139,8 +144,6 @@ def resolve_startup_models() -> tuple[str, str]:
         sub_lm = sub_env
     elif cached_sub_lm:
         if cached_model and not model_env:
-            print(f"{GREEN}⏺ Using cached sub_lm: {cached_sub_lm}{RESET}")
-            print()
             print()
         sub_lm = cached_sub_lm
     else:
@@ -168,33 +171,38 @@ def handle_model_command(
     if user_input != "/model":
         return False, agent, ""
 
-    print(f"\n{BOLD}Current RLM(model): {agent.config.lm}{RESET}")
-    print(f"{BOLD}Current sub model: {agent.config.sub_lm}{RESET}")
+    print(f"\n{BOLD}Current RLM(model): {agent.config.lm.removeprefix('openrouter/')}{RESET}")
+    print(f"{BOLD}Current sub model: {agent.config.sub_lm.removeprefix('openrouter/')}{RESET}")
 
     new_model = agent.config.lm
     model_selection = prompt_model_tui(
         "Select a new RLM(model):",
         _build_model_options(include_custom=True, include_keep=True),
     )
+
     if model_selection is None:
-        print(f"{GREEN}⏺ Keeping current model: {agent.config.lm}{RESET}")
+        print(f"{GREEN}⏺ Keeping current model: {agent.config.lm.removeprefix('openrouter/')}{RESET}")
         print(
-            f"{GREEN}⏺ Keeping current sub model: {normalize_model_id(agent.config.sub_lm)}{RESET}"
+            f"{GREEN}⏺ Keeping current sub model: {agent.config.sub_lm.removeprefix('openrouter/')}{RESET}"
         )
         return True, agent, normalize_model_id(agent.config.sub_lm)
+
     if model_selection == KEEP_OPTION:
-        print(f"{GREEN}⏺ Keeping current model: {agent.config.lm}{RESET}")
+        print(f"{GREEN}⏺ Keeping current model: {agent.config.lm.removeprefix('openrouter/')}{RESET}")
+
     elif model_selection == CUSTOM_OPTION:
         custom_model = click.prompt(
             "Enter model ID",
             default="",
             show_default=False,
         ).strip()
+
         if not custom_model:
             print(f"{RED}⏺ Invalid model ID, keeping current model{RESET}")
             return True, agent, normalize_model_id(agent.config.sub_lm)
         new_model = normalize_model_id(custom_model)
         print(f"{GREEN}⏺ Selected custom model: {new_model}{RESET}")
+
     else:
         new_model = normalize_model_id(model_selection)
         name = next(
@@ -212,27 +220,33 @@ def handle_model_command(
             include_primary=True,
         ),
     )
+
     if sub_selection is None or sub_selection == KEEP_OPTION:
         new_sub_lm = normalize_model_id(agent.config.sub_lm)
-        print(f"{GREEN}⏺ Keeping current sub model: {new_sub_lm}{RESET}")
+        print(f"{GREEN}⏺ Keeping current sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}")
+
     elif sub_selection == PRIMARY_OPTION:
         new_sub_lm = normalize_model_id(new_model)
-        print(f"{GREEN}⏺ sub model set to primary model: {new_sub_lm}{RESET}")
+        print(f"{GREEN}⏺ sub model set to primary model: {new_sub_lm.removeprefix('openrouter/')}{RESET}")
+
     elif sub_selection == CUSTOM_OPTION:
         custom_sub = click.prompt(
             "Enter sub model ID",
             default="",
             show_default=False,
         ).strip()
+
         if not custom_sub:
             print(f"{RED}⏺ Invalid sub model ID, keeping current sub model{RESET}")
             new_sub_lm = normalize_model_id(agent.config.sub_lm)
+
         else:
             new_sub_lm = normalize_model_id(custom_sub)
-            print(f"{GREEN}⏺ Selected custom sub model: {new_sub_lm}{RESET}")
+            print(f"{GREEN}⏺ Selected custom sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}")
+
     else:
         new_sub_lm = normalize_model_id(sub_selection)
-        print(f"{GREEN}⏺ Selected sub model: {new_sub_lm}{RESET}")
+        print(f"{GREEN}⏺ Selected sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}")
 
     agent = agent.__class__.from_precompiled(
         repo_path, config={"lm": normalize_model_id(new_model), "sub_lm": new_sub_lm}
@@ -242,6 +256,6 @@ def handle_model_command(
 
     save_model_config(normalize_model_id(new_model), new_sub_lm)
     print(
-        f"{GREEN}⏺ Switched to: {normalize_model_id(new_model)} | sub model: {new_sub_lm}{RESET}"
+        f"{GREEN}⏺ Switched to: {normalize_model_id(new_model)} | sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}"
     )
     return True, agent, new_sub_lm

@@ -24,6 +24,26 @@ from utils.paste import consume_paste_for_input, read_user_input
 MODAIC_REPO_PATH = "farouk1/nanocode"
 DEFAULT_HISTORY_LIMIT = 5
 app = typer.Typer(add_completion=False, help="Microcode interactive CLI.")
+BANNER_ART = """
+                      ▓██████▓                                          
+                    ░██████████░                                        
+            ▒█▒     ████████████                                        
+             ▓▓    ▓████████████▓                                       
+            ▓█▒    ▓█████████████      ░▓▓▓▒                            
+           ▒██     ▓████████████▒     ██▓░ ░▓▓░                         
+           ▒██▓     ▓███████████     ██▓                                
+            ▓███▓    ▓█████████    ▒███▓  ▒██░                          
+       ▓███▒  ██████▒▒████████▓▒██████▓  ▓█▓ ▒▓                         
+     ▒█████████▒▓███████████████████▒   ▓█▓                             
+     ▓▓     ▒█████████████████████▓   ▒███▒                             
+     ▓▒        ░▓████████████████████████▒                              
+              ██████▓▓██████████▒  ░░░░                                 
+             ▓██▒   ░███▓ ███▒▓██▓                                      
+             ▓██   ▓██▓    ▓██░▒█████████▓                              
+       ▒▒   ▓██▒  ███       ░██▓  ░▒▒░  ░█▒                             
+         ▓████▒   ██▒        ███                                        
+                  ▒███▒    ▓██▓                                         
+""".strip("\n")
 
 
 def format_auth_error(err: Exception) -> str | None:
@@ -54,17 +74,54 @@ def short_cwd(path: str) -> str:
 def print_banner(model: str, sub_lm: str, cwd: str, history_limit: int) -> None:
     env = os.getenv("MODAIC_ENV")
     env_label = f"{DIM}env:{RESET} {env}" if env else f"{DIM}env:{RESET} prod"
-    click.echo(
-        f"{BOLD}{BLUE}MICROCODE{RESET} {DIM} RLM TERMINAL AGENT{RESET}\n"
-        f"{DIM}RLM(model):{RESET} {model.removeprefix('openrouter/')}\n"
-        f"{DIM}sub model:{RESET} {sub_lm.removeprefix('openrouter/')}"
-    )
-    click.echo(
-        f"{DIM}cwd:{RESET} {cwd} | {env_label} | {DIM}history:{RESET} {history_limit}"
-    )
-    click.echo(
-        f"{DIM}Quick commands:{RESET} \n{BLUE}/help{RESET}\n{BLUE}/model{RESET}\n{BLUE}/openrouter-key{RESET}\n{BLUE}/c{RESET}\n{BLUE}/q{RESET}"
-    )
+    art_lines = BANNER_ART.splitlines()
+    while art_lines and not art_lines[0].strip():
+        art_lines.pop(0)
+    while art_lines and not art_lines[-1].strip():
+        art_lines.pop()
+
+    def gradient_color(line_index: int, total_lines: int) -> str:
+        if total_lines <= 1:
+            t = 0.0
+        else:
+            t = line_index / (total_lines - 1)
+        start = (150, 190, 230)
+        end = (40, 120, 200)
+        r = int(start[0] + (end[0] - start[0]) * t)
+        g = int(start[1] + (end[1] - start[1]) * t)
+        b = int(start[2] + (end[2] - start[2]) * t)
+        return f"\033[38;2;{r};{g};{b}m"
+
+    right_lines = [
+        f"{BOLD}{BLUE}MICROCODE{RESET} {DIM} RLM TERMINAL AGENT{RESET}",
+        f"{DIM}RLM(model):{RESET} {model.removeprefix('openrouter/')}",
+        f"{DIM}sub_model:{RESET} {sub_lm.removeprefix('openrouter/')}",
+        "",
+        f"{DIM}cwd:{RESET} {cwd} | {env_label} | {DIM}max_turns:{RESET} {history_limit}",
+        "",
+        f"{DIM}Quick commands:{RESET}",
+        f"{BLUE}/help - help{RESET}",
+        f"{BLUE}/model - switch RLM model and sub model{RESET}",
+        f"{BLUE}/openrouter-key - set API key{RESET}",
+        f"{BLUE}/c - clear conversation{RESET}",
+        f"{BLUE}/q - quit{RESET}",
+    ]
+
+    total_lines = max(len(art_lines), len(right_lines))
+    art_width = max((len(line) for line in art_lines), default=0)
+
+    banner_lines = []
+    for idx in range(total_lines):
+        left_raw = art_lines[idx] if idx < len(art_lines) else ""
+        left_padded = left_raw.ljust(art_width)
+        if left_raw:
+            left = f"{gradient_color(idx, len(art_lines))}{left_padded}{RESET}"
+        else:
+            left = left_padded
+        right = right_lines[idx] if idx < len(right_lines) else ""
+        banner_lines.append(f"{left}  {right}")
+
+    click.echo("\n".join(banner_lines))
 
 
 def print_help() -> None:
@@ -81,7 +138,7 @@ def print_status_line(model: str, sub_lm: str, cwd: str, mcp_servers: dict) -> N
     mcp_label = f"{len(mcp_servers)}" if mcp_servers else "0"
     click.echo(
         f"{DIM}cwd:{RESET} {cwd}  {DIM}RLM(model):{RESET} {model.removeprefix('openrouter/')}  "
-        f"{DIM}sub model:{RESET} {sub_lm.removeprefix('openrouter/')}  {DIM}mcp tools:{RESET} {mcp_label}"
+        f"{DIM}sub_model:{RESET} {sub_lm.removeprefix('openrouter/')}  {DIM}mcp_tools:{RESET} {mcp_label}"
         "\n"
     )
 
@@ -90,7 +147,6 @@ def run_interactive(history_limit: int, show_banner: bool) -> None:
     cached_key = load_openrouter_key()
     if cached_key and not os.getenv("OPENROUTER_API_KEY"):
         os.environ["OPENROUTER_API_KEY"] = cached_key
-        click.echo(f"{GREEN}⏺ Loaded OpenRouter key from cache{RESET}")
 
     model, sub_lm = resolve_startup_models()
 
