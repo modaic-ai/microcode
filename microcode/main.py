@@ -222,7 +222,7 @@ def run_interactive(
                     register_mcp_server,
                     MODAIC_REPO_PATH,
                 )
-                print_status_line(model, sub_lm, cwd, mcp_servers)
+                print_status_line(agent.lm.model.removeprefix("openrouter/"), agent.sub_lm.model.removeprefix("openrouter/"), cwd, mcp_servers)
 
             if handled:
                 if new_sub_lm:

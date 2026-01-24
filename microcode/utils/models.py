@@ -133,13 +133,6 @@ def select_model() -> str:
             click.echo(f"{RED}⏺ Invalid model ID{RESET}")
             continue
 
-        name = next(
-            name
-            for name, model_id in AVAILABLE_MODELS.values()
-            if model_id == selection
-        )
-
-        click.echo(f"{GREEN}⏺ Selected: {name}{RESET}")
         return selection
 
 
@@ -183,12 +176,6 @@ def select_sub_model(primary_model: str) -> str:
             click.echo(f"{RED}⏺ Invalid sub model ID{RESET}")
             continue
 
-        name = next(
-            name
-            for name, model_id in AVAILABLE_MODELS.values()
-            if model_id == selection
-        )
-        click.echo(f"{GREEN}⏺ Selected sub model: {name}{RESET}")
         return selection
 
 
@@ -315,12 +302,6 @@ def handle_model_command(
 
     else:
         new_model = normalize_model_id(model_selection)
-        name = next(
-            name
-            for name, model_id in AVAILABLE_MODELS.values()
-            if model_id == model_selection
-        )
-        print(f"{GREEN}⏺ Selected: {name} ({new_model}){RESET}")
 
     sub_selection = prompt_model_tui(
         "Select the RLM's sub model (usually a smaller, faster model than the base):",
@@ -367,7 +348,4 @@ def handle_model_command(
         info["tools"] = register_mcp_server(agent, server_name, info["server"])
 
     save_model_config(normalize_model_id(new_model), new_sub_lm)
-    click.echo(
-        f"{GREEN}⏺ Switched to: {normalize_model_id(new_model)} | sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}"
-    )
     return True, agent, new_sub_lm

@@ -1,7 +1,7 @@
 import os
 import re
 import shutil
-from .constants import RESET, BOLD, DIM, BLUE, BANNER_ART
+from .constants import RESET, BOLD, DIM, BLUE, BANNER_ART, GREEN
 import click
 
 
@@ -198,7 +198,7 @@ def print_status_line(model: str, sub_lm: str, cwd: str, mcp_servers: dict) -> N
     """
     mcp_label = f"{len(mcp_servers)}" if mcp_servers else "0"
     click.echo(
-        f"{DIM}cwd:{RESET} {cwd}  {DIM}RLM(model):{RESET} {model.removeprefix('openrouter/')}  "
-        f"{DIM}sub_model:{RESET} {sub_lm.removeprefix('openrouter/')}  {DIM}mcp_tools:{RESET} {mcp_label}"
+        f"{DIM}cwd:{RESET} {GREEN}{cwd}{RESET}  {DIM}RLM(model):{RESET} {GREEN}{model.removeprefix('openrouter/')}{RESET}  "
+        f"{DIM}sub_model:{RESET} {GREEN}{sub_lm.removeprefix('openrouter/')}{RESET}  {DIM}mcp_tools:{RESET} {GREEN}{mcp_label}{RESET}"
         "\n"
     )
