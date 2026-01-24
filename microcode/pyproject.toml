@@ -1,7 +1,7 @@
 [project]
 name = "microcode"
-version = "0.1.6"
-description = "Minimal Claude Code CLI powered by Modaic + DSPy RLM's"
+version = "0.1.7"
+description = "Minimal Terminal Agent powered by RLMs"
 readme = "README.md"
 requires-python = ">=3.13"
 authors = [{name = "Farouk Adeleke", email = "farouk@modaic.dev"}]
