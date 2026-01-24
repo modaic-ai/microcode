@@ -1,11 +1,9 @@
 import os
+import re
 import shutil
 from .constants import RESET, BOLD, DIM, BLUE, BANNER_ART, GREEN
 import click
-from rich.console import Console
-from rich.markdown import Markdown
-
-console = Console()
+from typing import Optional
 
 def separator() -> str:
     """
@@ -14,17 +12,102 @@ def separator() -> str:
     size = shutil.get_terminal_size() or 800
     return f"{DIM}{'─' * size.columns}{RESET}"
 
-
-def render_markdown(text: str) -> None:
+def render_markdown(text: str) -> str:
     """
-    Render markdown text using Rich.
+    Convert markdown formatting to ANSI escape codes.
+    
+    Supports:
+    - Bold: **text** or __text__
+    - Italic: *text* or _text_
+    - Code: `text`
+    - Strikethrough: ~~text~~
     
     Args:
-        text: The markdown text to render
+        text: Input string with markdown formatting
+        
+    Returns:
+        String with ANSI escape codes
+        
+    Raises:
+        TypeError: If text is not a string
     """
     assert isinstance(text, str), "text must be a str"
-    md = Markdown(text)
-    console.print(md)
+    
+    if not text:
+        return text
+    
+    # Define ANSI codes (with fallback if not defined globally)
+    try:
+        bold = BOLD
+        reset = RESET
+    except NameError:
+        bold = "\033[1m"
+        reset = "\033[0m"
+        italic = "\033[3m"
+        dim = "\033[2m"
+        strikethrough = "\033[9m"
+    else:
+        # Assume other codes follow same pattern if BOLD/RESET are defined
+        italic = getattr(__builtins__, 'ITALIC', "\033[3m")
+        dim = getattr(__builtins__, 'DIM', "\033[2m")
+        strikethrough = getattr(__builtins__, 'STRIKETHROUGH', "\033[9m")
+    
+    result = text
+    
+    # Process in order to handle nested formatting correctly
+    # 1. Code blocks (prevent them from being processed as other formatting)
+    code_placeholder = "\x00CODE\x00"
+    code_matches = []
+    for match in re.finditer(r"`([^`]+)`", result):
+        code_matches.append(f"{dim}{match.group(1)}{reset}")
+    result = re.sub(r"`[^`]+`", code_placeholder, result)
+    
+    # 2. Bold (both ** and __)
+    # Use non-greedy matching and handle newlines
+    result = re.sub(r"\*\*(.+?)\*\*", f"{bold}\\1{reset}", result, flags=re.DOTALL)
+    result = re.sub(r"__(.+?)__", f"{bold}\\1{reset}", result, flags=re.DOTALL)
+    
+    # 3. Italic (both * and _)
+    # Exclude cases where * or _ is part of bold syntax or at word boundaries
+    result = re.sub(r"(?<!\*)\*(?!\*)([^\*]+?)(?<!\*)\*(?!\*)", f"{italic}\\1{reset}", result)
+    result = re.sub(r"(?<!_)_(?!_)([^_]+?)(?<!_)_(?!_)", f"{italic}\\1{reset}", result)
+    
+    # 4. Strikethrough
+    result = re.sub(r"~~(.+?)~~", f"{strikethrough}\\1{reset}", result, flags=re.DOTALL)
+    
+    # 5. Restore code blocks
+    for code_match in code_matches:
+        result = result.replace(code_placeholder, code_match, 1)
+    
+    return result
+
+
+# Alternative simpler version if you just want to improve the original:
+def render_markdown_simple(text: str) -> str:
+    """
+    Convert basic markdown bold syntax to ANSI bold (improved version).
+    
+    Args:
+        text: Input string with markdown formatting
+        
+    Returns:
+        String with ANSI bold formatting
+        
+    Raises:
+        TypeError: If text is not a string
+    """
+    assert isinstance(text, str), "text must be a str"
+    
+    if not text:
+        return text
+    
+    # Define ANSI codes with fallback
+    bold = getattr(__builtins__, 'BOLD', None) or "\033[1m"
+    reset = getattr(__builtins__, 'RESET', None) or "\033[0m"
+    
+    # Use re.DOTALL to handle multi-line bold text
+    # Non-greedy matching to handle multiple bold sections
+    return re.sub(r"\*\*(.+?)\*\*", f"{bold}\\1{reset}", text, flags=re.DOTALL)
 
 
 def format_auth_error(err: Exception) -> str | None:
