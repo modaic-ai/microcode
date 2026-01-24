@@ -1,5 +1,4 @@
 from datetime import datetime
-from pytz import UTC
 import os
 import shlex
 import getpass
@@ -160,6 +159,8 @@ def run_interactive(
 
     history = []
     mcp_servers = {}
+    paste_store = {}
+    paste_counter = 0
 
     while True:
         try:
@@ -232,24 +233,49 @@ def run_interactive(
                 if handle_add_mcp_command(user_input, agent, mcp_servers):
                     continue
 
-            context = f"Working directory: {os.getcwd()}\nTime: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-            if history:
-                context += "Previous conversation:\n"
-                for h in history[-history_limit:]:
-                    context += f"User: {h['user']}\nAssistant: {h['assistant']}\n\n"
-
             paste_payload = consume_paste_for_input(user_input)
             if paste_payload:
-                context += f"\nPasted content:\n{paste_payload['text']}\n"
+                paste_counter += 1
+                paste_id = f"paste_{paste_counter}"
+                paste_store[paste_id] = paste_payload["text"]
+                user_input = user_input.replace(
+                    paste_payload["placeholder"], f"[{paste_id}]"
+                )
 
-            task = f"Current task: {user_input}\n{context}\n"
+            context_lines = [
+                f"cwd: {os.getcwd()}",
+                f"time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                f"Current Task: {user_input}",
+                "Previous Conversation History:",
+            ]
+            if history:
+                for h in history[-history_limit:]:
+                    context_lines.append(f"  User: {h['user']}")
+                    context_lines.append(f"  Assistant: {h['assistant']}")
+            else:
+                context_lines.append("  None")
+
+            context_lines.append("All Pasted Content:")
+            if paste_store:
+                for paste_id in paste_store:
+                    context_lines.append(f"[{paste_id}]")
+                context_lines.append(str(paste_store))
+            else:
+                context_lines.append("  None")
+
+            task = "\n".join(context_lines) + "\n"
+            if os.getenv("MODAIC_ENV") == "dev":
+                with open("debug.txt", "w") as f:
+                    f.write(task + "\n")
 
             click.echo(f"\n{CYAN}⏺{RESET} Thinking...", nl=True)
             result = agent(task=task)
 
             click.echo(f"\n{CYAN}⏺{RESET} {render_markdown(result.answer)}")
 
-            history.append({"user": user_input, "assistant": result.answer})
+            history.append(
+                {"user": user_input, "assistant": result.answer, "pasted_content": None}
+            )
             click.echo()
 
         except (KeyboardInterrupt, EOFError):
