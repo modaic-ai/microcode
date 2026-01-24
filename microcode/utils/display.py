@@ -1,9 +1,11 @@
 import os
-import re
 import shutil
 from .constants import RESET, BOLD, DIM, BLUE, BANNER_ART, GREEN
 import click
+from rich.console import Console
+from rich.markdown import Markdown
 
+console = Console()
 
 def separator() -> str:
     """
@@ -13,12 +15,16 @@ def separator() -> str:
     return f"{DIM}{'─' * size.columns}{RESET}"
 
 
-def render_markdown(text: str) -> str:
+def render_markdown(text: str) -> None:
     """
-    Convert basic markdown bold syntax to ANSI bold.
+    Render markdown text using Rich.
+    
+    Args:
+        text: The markdown text to render
     """
     assert isinstance(text, str), "text must be a str"
-    return re.sub(r"\*\*(.+?)\*\*", f"{BOLD}\\1{RESET}", text)
+    md = Markdown(text)
+    console.print(md)
 
 
 def format_auth_error(err: Exception) -> str | None:

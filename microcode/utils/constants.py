@@ -6,7 +6,7 @@ MODAIC_REPO_PATH = "farouk1/nanocode"
 
 
 # Display
-DEFAULT_HISTORY_LIMIT = 5
+DEFAULT_HISTORY_LIMIT = 12
 BANNER_ART = """
                       ▓██████▓                                          
                     ░██████████░                                        
