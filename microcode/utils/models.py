@@ -9,7 +9,7 @@ from textual.widgets.option_list import Option
 from modaic import AutoProgram, PrecompiledProgram
 
 from .cache import load_model_config, save_model_config
-from .constants import AVAILABLE_MODELS, BOLD, GREEN, RED, RESET
+from .constants import AVAILABLE_MODELS, GREEN, RED, RESET
 
 
 def normalize_model_id(model_id: str) -> str:

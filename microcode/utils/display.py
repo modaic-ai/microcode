@@ -10,7 +10,6 @@ def separator() -> str:
     Return a horizontal separator line that fits the terminal width.
     """
     size = shutil.get_terminal_size() or 800
-    assert size.columns > 0, "terminal columns must be positive"
     return f"{DIM}{'─' * size.columns}{RESET}"
 
 
@@ -59,6 +58,9 @@ def short_cwd(path: str) -> str:
     Returns:
         The shortened path
     """
+    assert path is not None, "path must not be None"
+    assert isinstance(path, str), "path must be a str"
+
     parts = path.split(os.sep)
     if len(parts) <= 2:
         return path
@@ -75,6 +77,9 @@ def read_int_env(var_name: str) -> int | None:
     Returns:
         The integer value or None if not set or invalid
     """
+    assert var_name is not None, "var_name must not be None"
+    assert isinstance(var_name, str), "var_name must be a str"
+
     value = os.getenv(var_name)
     if value is None:
         return None
@@ -107,7 +112,6 @@ def print_banner(
         max_output_chars: Maximum number of output characters
         verbose: Enable verbose logging
     """
-    env = os.getenv("MODAIC_ENV")
     art_lines = BANNER_ART.splitlines()
     while art_lines and not art_lines[0].strip():
         art_lines.pop(0)
@@ -186,7 +190,9 @@ def print_help() -> None:
     click.echo(f"  {BLUE}/reset{RESET}           Reset to default configuration")
 
 
-def print_status_line(model: str, sub_lm: str, cwd: str, mcp_servers: dict) -> None:
+def print_status_line(
+    model: str, sub_lm: str, cwd: str, mcp_servers: dict | None = None
+) -> None:
     """
     Print the status line with current configuration.
 
@@ -196,6 +202,11 @@ def print_status_line(model: str, sub_lm: str, cwd: str, mcp_servers: dict) -> N
         cwd: The current working directory
         mcp_servers: Dictionary of MCP servers
     """
+    assert isinstance(model, str), "model must be a str"
+    assert isinstance(sub_lm, str), "sub_lm must be a str"
+    assert isinstance(cwd, str), "cwd must be a str"
+    assert isinstance(mcp_servers, dict | None), "mcp_servers must be a dict or None"
+
     mcp_label = f"{len(mcp_servers)}" if mcp_servers else "0"
     click.echo(
         f"{DIM}cwd:{RESET} {GREEN}{cwd}{RESET}  {DIM}RLM(model):{RESET} {GREEN}{model.removeprefix('openrouter/')}{RESET}  "
