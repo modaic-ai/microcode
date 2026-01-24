@@ -281,13 +281,6 @@ def handle_model_command(
     assert callable(register_mcp_server), "register_mcp_server must be callable"
     assert isinstance(repo_path, str), "repo_path must be a str"
 
-    print(
-        f"\n{BOLD}Current RLM(model): {agent.config.lm.removeprefix('openrouter/')}{RESET}"
-    )
-    print(
-        f"{BOLD}Current sub model: {agent.config.sub_lm.removeprefix('openrouter/')}{RESET}"
-    )
-
     new_model = agent.config.lm
     model_selection = prompt_model_tui(
         "Select a base RLM model:",
@@ -319,7 +312,6 @@ def handle_model_command(
             print(f"{RED}⏺ Invalid model ID, keeping current model{RESET}")
             return True, agent, normalize_model_id(agent.config.sub_lm)
         new_model = normalize_model_id(custom_model)
-        print(f"{GREEN}⏺ Selected custom model: {new_model}{RESET}")
 
     else:
         new_model = normalize_model_id(model_selection)
@@ -341,15 +333,9 @@ def handle_model_command(
 
     if sub_selection is None or sub_selection == KEEP_OPTION:
         new_sub_lm = normalize_model_id(agent.config.sub_lm)
-        print(
-            f"{GREEN}⏺ Keeping current sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}"
-        )
 
     elif sub_selection == PRIMARY_OPTION:
         new_sub_lm = normalize_model_id(new_model)
-        print(
-            f"{GREEN}⏺ sub model set to primary model: {new_sub_lm.removeprefix('openrouter/')}{RESET}"
-        )
 
     elif sub_selection == CUSTOM_OPTION:
         custom_sub = click.prompt(
@@ -359,20 +345,13 @@ def handle_model_command(
         ).strip()
 
         if not custom_sub:
-            print(f"{RED}⏺ Invalid sub model ID, keeping current sub model{RESET}")
             new_sub_lm = normalize_model_id(agent.config.sub_lm)
 
         else:
             new_sub_lm = normalize_model_id(custom_sub)
-            print(
-                f"{GREEN}⏺ Selected custom sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}"
-            )
 
     else:
         new_sub_lm = normalize_model_id(sub_selection)
-        print(
-            f"{GREEN}⏺ Selected sub model: {new_sub_lm.removeprefix('openrouter/')}{RESET}"
-        )
 
     config = {"lm": normalize_model_id(new_model), "sub_lm": new_sub_lm}
     for key in ("max_iters", "max_tokens", "max_output_chars", "api_base", "verbose"):
