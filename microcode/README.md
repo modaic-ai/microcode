@@ -3,7 +3,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.6-orange.svg)](https://github.com/modaic-ai/microcode)
+[![Version](https://img.shields.io/badge/version-0.1.7-orange.svg)](https://github.com/modaic-ai/microcode)
 
 Microcode is an efficient terminal-based AI agent that provides an interactive REPL experience for coding assistance. It leverages Reasoning Language Models (RLMs) to help developers with coding tasks directly from the command line. Because we are using RLMs, it can handle extra large code snippets, file contents, and pasted content with ease.
 
@@ -23,6 +23,29 @@ Microcode is an efficient terminal-based AI agent that provides an interactive R
 
 - Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- [Deno](https://deno.com/) (RLM runtime for the REPL)
+
+Install Deno with one of the following:
+
+```bash
+curl -fsSL https://deno.land/install.sh | sh
+```
+
+```bash
+brew install deno
+```
+
+### Install via uv (recommended)
+
+```bash
+uv tool install microcode
+```
+
+### Upgrade via uv
+
+```bash
+uv tool upgrade microcode
+```
 
 ### Install via pip
 
