@@ -1,7 +1,7 @@
 # Microcode
 > Minimal Terminal Agent powered by RLMs
 
-[![Python Version](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.7-orange.svg)](https://github.com/modaic-ai/microcode)
 
@@ -26,7 +26,7 @@ Microcode is an efficient terminal-based AI agent with an internal REPL environm
 
 ### Prerequisites
 
-- Python 3.13 or higher
+- Python 3.11 or higher
 - [uv](https://github.com/astral-sh/uv) (recommended) or pip
 - [Deno](https://deno.com/) (RLM runtime for the REPL)
 
