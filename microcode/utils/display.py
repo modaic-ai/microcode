@@ -3,7 +3,6 @@ import re
 import shutil
 from .constants import RESET, BOLD, DIM, BLUE, BANNER_ART, GREEN
 import click
-from typing import Optional
 
 
 def separator() -> str:
@@ -230,6 +229,10 @@ def print_banner(
         b = int(start[2] + (end[2] - start[2]) * t)
         return f"\033[38;2;{r};{g};{b}m"
 
+    def visible_len(text: str) -> int:
+        ansi_escape = re.compile(r"\x1b\[[0-9;]*m")
+        return len(ansi_escape.sub("", text))
+
     right_lines = [
         f"{BOLD}{BLUE}MICROCODE -{RESET} {DIM}An Efficient RLM Terminal Agent{RESET}",
         "",
@@ -251,19 +254,25 @@ def print_banner(
         f"  {BLUE}/q - quit{RESET}",
     ]
 
+    terminal_width = shutil.get_terminal_size().columns
     total_lines = max(len(art_lines), len(right_lines))
     art_width = max((len(line) for line in art_lines), default=0)
+    right_width = max((visible_len(line) for line in right_lines), default=0)
+    min_width_for_art = art_width + 2 + right_width
 
-    banner_lines = []
-    for idx in range(total_lines):
-        left_raw = art_lines[idx] if idx < len(art_lines) else ""
-        left_padded = left_raw.ljust(art_width)
-        if left_raw:
-            left = f"{gradient_color(idx, len(art_lines))}{left_padded}{RESET}"
-        else:
-            left = left_padded
-        right = right_lines[idx] if idx < len(right_lines) else ""
-        banner_lines.append(f"{left}  {right}")
+    if terminal_width < min_width_for_art:
+        banner_lines = right_lines
+    else:
+        banner_lines = []
+        for idx in range(total_lines):
+            left_raw = art_lines[idx] if idx < len(art_lines) else ""
+            left_padded = left_raw.ljust(art_width)
+            if left_raw:
+                left = f"{gradient_color(idx, len(art_lines))}{left_padded}{RESET}"
+            else:
+                left = left_padded
+            right = right_lines[idx] if idx < len(right_lines) else ""
+            banner_lines.append(f"{left}  {right}")
 
     click.echo("\n".join(banner_lines))
 

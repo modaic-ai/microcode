@@ -134,7 +134,7 @@ def run_interactive(
         verbose=verbose,
     )
 
-    agent = AutoProgram.from_precompiled(  # Load rlm program from modaic
+    agent = AutoProgram.from_precompiled(  # Load RLM program from https://www.modaic.dev/farouk1/nanocode
         MODAIC_REPO_PATH,
         rev=os.getenv("MODAIC_ENV", "prod"),
         config=config,
