@@ -3,7 +3,7 @@ name = "microcode"
 version = "0.1.9"
 description = "Minimal Terminal Agent powered by RLMs"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 authors = [{name = "Farouk Adeleke", email = "farouk@modaic.dev"}]
 dependencies = [
     "click>=8.3.1",
@@ -23,7 +23,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Software Development :: Build Tools",
     "Topic :: Utilities",
 ]
