@@ -113,7 +113,7 @@ microcode --help
 
 | Flag | Description |
 |------|-------------|
-| `--model, -m` | Override primary model |
+| `--lm, -m` | Override primary model |
 | `--sub-lm, -s` | Override sub-model |
 | `--api-key, -k` | Provide API key directly |
 | `--max-iterations` | Set max iterations |
@@ -153,6 +153,13 @@ Once in the CLI, use these commands:
 | 6 | Gemini 3 Flash Preview | Google |
 | 7 | Kimi K2 0905 | Moonshot AI |
 | 8 | Minimax M2.1 | Minimax |
+| 9 | Add your own openrouter model | Custom |
+
+### Single Task Mode
+
+```bash
+microcode task "Your task here"
+```
 
 ## Project Structure
 
@@ -174,7 +181,7 @@ microcode/
 
 ### Key Components
 
-- **`main.py`** - Orchestrates the interactive session, handles user input, manages conversation history, and invokes the AI agent via Modaic's `AutoProgram`
+- **`main.py`** - Orchestrates the interactive session, handles user input, manages conversation history, and invokes the RLM agent via Modaic's `AutoProgram`
 - **`utils/cache.py`** - Secure storage for API keys and user preferences using JSON files
 - **`utils/constants.py`** - Centralized configuration including available models, ANSI color codes, and file paths
 - **`utils/display.py`** - Terminal output formatting, markdown rendering, and the startup banner
@@ -197,10 +204,6 @@ uv sync --dev
 ```bash
 uv run pytest tests/
 ```
-
-### Code Style
-
-The project follows standard Python conventions. Use type hints for all function signatures.
 
 ## Dependencies
 
