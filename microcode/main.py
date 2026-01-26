@@ -337,7 +337,7 @@ def run_task(
         None, "--lm", "-m", help="Override primary model ID."
     ),
     sub_lm: str | None = typer.Option(
-        None, "--sub-lm", help="Override sub_lm model ID."
+        None, "--sub-lm", "-s", help="Override sub_lm model ID."
     ),
     api_key: str | None = typer.Option(None, "--api-key", help="Override API key."),
     max_iterations: int = typer.Option(
@@ -386,7 +386,7 @@ def cli(
         None, "--lm", "-m", help="Override primary model ID."
     ),
     sub_lm: str | None = typer.Option(
-        None, "--sub-lm", help="Override sub_lm model ID."
+        None, "--sub-lm", "-s", help="Override sub_lm model ID."
     ),
     api_key: str | None = typer.Option(None, "--api-key", help="Override API key."),
     max_iterations: int = typer.Option(
