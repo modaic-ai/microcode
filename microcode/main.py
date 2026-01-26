@@ -18,7 +18,6 @@ from utils.constants import (
     BOLD,
     BLUE,
     CYAN,
-    DIM,
     GREEN,
     RED,
     RESET,
@@ -41,44 +40,28 @@ from utils.paste import consume_paste_for_input, read_user_input
 app = typer.Typer(add_completion=False, help="Microcode interactive CLI.")
 
 
-def run_interactive(
-    history_limit: int,
-    show_banner: bool,
-    model: str | None = None,
-    sub_lm: str | None = None,
-    api_key: str | None = None,
-    max_iterations: int | None = None,
-    max_tokens: int | None = None,
-    max_output_chars: int | None = None,
-    api_base: str | None = None,
-    verbose: bool | None = None,
-    env: str | None = None,
-) -> None:
+def init_agent(
+    model: str | None,
+    sub_lm: str | None,
+    api_key: str | None,
+    max_iterations: int | None,
+    max_tokens: int | None,
+    max_output_chars: int | None,
+    api_base: str | None,
+    verbose: bool | None,
+    env: str | None,
+) -> tuple[AutoProgram, str | None, str | None]:
     """
-    Run the interactive CLI session.
-
-    This function initializes the agent and starts the interactive loop.
-    It handles user input, processes commands, and manages the conversation history.
-
-    Args:
-        history_limit: Maximum number of messages to keep in history
-        show_banner: Whether to display the startup banner
-        model: Override for the primary model ID
-        sub_lm: Override for the sub model ID
-        api_key: Override for the API key
-        max_iterations: Maximum number of iterations
-        max_tokens: Maximum number of tokens
-        max_output_chars: Maximum number of output characters
-        api_base: Override for the API base URL
-        verbose: Enable verbose logging
-        env: Set the environment (dev or prod)
+    Build an AutoProgram instance with the specified configuration.
     """
+
     if model is None:
         model = os.getenv("MICROCODE_MODEL")
     if sub_lm is None:
         sub_lm = os.getenv("MICROCODE_SUB_LM")
     if env is None:
         env = os.getenv("MODAIC_ENV") or os.getenv("MICROCODE_ENV")
+
     cached_settings = load_settings_config()
     if verbose is None:
         env_verbose = os.getenv("MICROCODE_VERBOSE")
@@ -88,14 +71,17 @@ def run_interactive(
             verbose = bool(cached_settings["verbose"])
         else:
             verbose = False
+
     if max_iterations is None:
         max_iterations = read_int_env("MICROCODE_MAX_ITERATIONS")
         if max_iterations is None:
             max_iterations = cached_settings.get("max_iters")
+
     if max_tokens is None:
         max_tokens = read_int_env("MICROCODE_MAX_TOKENS")
         if max_tokens is None:
             max_tokens = cached_settings.get("max_tokens")
+
     if max_output_chars is None:
         max_output_chars = read_int_env("MICROCODE_MAX_OUTPUT_CHARS")
         if max_output_chars is None:
@@ -134,18 +120,64 @@ def run_interactive(
         verbose=verbose,
     )
 
-    agent = AutoProgram.from_precompiled(  # Load RLM program from https://www.modaic.dev/farouk1/nanocode
+    agent = AutoProgram.from_precompiled(
         MODAIC_REPO_PATH,
         rev=os.getenv("MODAIC_ENV", "prod"),
         config=config,
+    )
+    return agent, model, sub_lm
+
+
+def run_interactive(
+    history_limit: int,
+    show_banner: bool,
+    model: str | None = None,
+    sub_lm: str | None = None,
+    api_key: str | None = None,
+    max_iterations: int | None = None,
+    max_tokens: int | None = None,
+    max_output_chars: int | None = None,
+    api_base: str | None = None,
+    verbose: bool | None = None,
+    env: str | None = None,
+) -> None:
+    """
+    Run the interactive CLI session.
+
+    This function initializes the agent and starts the interactive loop.
+    It handles user input, processes commands, and manages the conversation history.
+
+    Args:
+        history_limit: Maximum number of messages to keep in history
+        show_banner: Whether to display the startup banner
+        model: Override for the primary model ID
+        sub_lm: Override for the sub model ID
+        api_key: Override for the API key
+        max_iterations: Maximum number of iterations
+        max_tokens: Maximum number of tokens
+        max_output_chars: Maximum number of output characters
+        api_base: Override for the API base URL
+        verbose: Enable verbose logging
+        env: Set the environment (dev or prod)
+    """
+    agent, resolved_model, resolved_sub_lm = init_agent(
+        model=model,
+        sub_lm=sub_lm,
+        api_key=api_key,
+        max_iterations=max_iterations,
+        max_tokens=max_tokens,
+        max_output_chars=max_output_chars,
+        api_base=api_base,
+        verbose=verbose,
+        env=env,
     )
 
     cwd = os.getcwd()
 
     if show_banner:
         print_banner(
-            model,
-            sub_lm,
+            resolved_model,
+            resolved_sub_lm,
             cwd,
             history_limit,
             max_iterations,
@@ -296,6 +328,55 @@ def run_interactive(
 
             traceback.print_exc()
             click.echo(f"{RED}⏺ Error: {err}{RESET}")
+
+
+@app.command("task")
+def run_task(
+    prompt: str = typer.Argument(..., help="Task prompt to run once and exit."),
+    model: str | None = typer.Option(
+        None, "--lm", "-m", help="Override primary model ID."
+    ),
+    sub_lm: str | None = typer.Option(
+        None, "--sub-lm", help="Override sub_lm model ID."
+    ),
+    api_key: str | None = typer.Option(None, "--api-key", help="Override API key."),
+    max_iterations: int = typer.Option(
+        50, "--max-iterations", help="Maximum number of iterations."
+    ),
+    max_tokens: int = typer.Option(
+        50000, "--max-tokens", help="Maximum number of tokens."
+    ),
+    max_output_chars: int = typer.Option(
+        100000, "--max-output-tokens", help="Maximum number of output tokens."
+    ),
+    api_base: str = typer.Option(
+        "https://openrouter.ai/api/v1", "--api-base", help="Override API base URL."
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging."
+    ),
+    env: Literal["dev", "prod"] = typer.Option(
+        os.getenv("MODAIC_ENV", os.getenv("MICROCODE_ENV", "prod")),
+        "--env",
+        help="Set MODAIC_ENV.",
+    ),
+) -> None:
+    """
+    Run a single task and exit.
+    """
+    agent, _, _ = init_agent(
+        model=model,
+        sub_lm=sub_lm,
+        api_key=api_key,
+        max_iterations=max_iterations,
+        max_tokens=max_tokens,
+        max_output_chars=max_output_chars,
+        api_base=api_base,
+        verbose=verbose,
+        env=env,
+    )
+    result = agent(task=prompt)
+    click.echo(result.answer)
 
 
 @app.callback(invoke_without_command=True)
