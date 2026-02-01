@@ -34,6 +34,9 @@ def _run_interactive(monkeypatch, tmp_path, env_vars, cache_settings, **override
         "api_base": None,
         "verbose": None,
         "env": None,
+        "track_trace": None,
+        "wandb_project": None,
+        "wandb_key": None,
     }
     defaults.update(overrides)
 
@@ -49,6 +52,8 @@ def _run_interactive(monkeypatch, tmp_path, env_vars, cache_settings, **override
         "MICROCODE_ENV",
         "MODAIC_ENV",
         "OPENROUTER_API_KEY",
+        "WANDB_PROJECT",
+        "WANDB_API_KEY",
     ):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path))
@@ -173,3 +178,22 @@ def test_cache_used_when_no_overrides(monkeypatch, tmp_path):
     assert saved == expected
     for key, value in expected.items():
         assert captured.get(key) == value
+
+
+def test_track_trace_and_wandb_env(monkeypatch, tmp_path):
+    env_vars = {}
+    cache_settings = {}
+
+    _saved, captured = _run_interactive(
+        monkeypatch,
+        tmp_path,
+        env_vars,
+        cache_settings,
+        track_trace=True,
+        wandb_project="proj-x",
+        wandb_key="key-x",
+    )
+
+    assert captured.get("track_trace") is True
+    assert os.getenv("WANDB_PROJECT") == "proj-x"
+    assert os.getenv("WANDB_API_KEY") == "key-x"

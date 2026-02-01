@@ -5,6 +5,7 @@ import getpass
 from typing import Literal
 import click
 import typer
+import shutil
 from modaic import AutoProgram
 
 from utils.cache import (
@@ -50,6 +51,9 @@ def init_agent(
     api_base: str | None,
     verbose: bool | None,
     env: str | None,
+    track_trace: bool | None,
+    wandb_project: str | None,
+    wandb_key: str | None,
 ) -> tuple[AutoProgram, str | None, str | None]:
     """
     Build an AutoProgram instance with the specified configuration.
@@ -95,6 +99,10 @@ def init_agent(
         os.environ["MODAIC_ENV"] = env
     if api_key and not os.getenv("OPENROUTER_API_KEY"):
         os.environ["OPENROUTER_API_KEY"] = api_key
+    if wandb_project:
+        os.environ["WANDB_PROJECT"] = wandb_project
+    if wandb_key:
+        os.environ["WANDB_API_KEY"] = wandb_key
 
     openrouter_key = load_openrouter_key()
     if openrouter_key and not os.getenv("OPENROUTER_API_KEY"):
@@ -111,6 +119,8 @@ def init_agent(
         config["max_output_chars"] = max_output_chars
     if api_base:
         config["api_base"] = api_base
+    if track_trace:
+        config["track_trace"] = True
 
     save_settings_config(
         max_iters=max_iterations,
@@ -140,6 +150,9 @@ def run_interactive(
     api_base: str | None = None,
     verbose: bool | None = None,
     env: str | None = None,
+    track_trace: bool | None = None,
+    wandb_project: str | None = None,
+    wandb_key: str | None = None,
 ) -> None:
     """
     Run the interactive CLI session.
@@ -159,6 +172,9 @@ def run_interactive(
         api_base: Override for the API base URL
         verbose: Enable verbose logging
         env: Set the environment (dev or prod)
+        track_trace: Enable trace tracking
+        wandb_project: Set Weights & Biases project name
+        wandb_key: Set Weights & Biases API key
     """
     agent, resolved_model, resolved_sub_lm = init_agent(
         model=model,
@@ -170,6 +186,9 @@ def run_interactive(
         api_base=api_base,
         verbose=verbose,
         env=env,
+        track_trace=track_trace,
+        wandb_project=wandb_project,
+        wandb_key=wandb_key,
     )
 
     cwd = os.getcwd()
@@ -184,6 +203,8 @@ def run_interactive(
             max_tokens,
             max_output_chars,
             verbose,
+            track_trace,
+            wandb_project,
         )
         click.echo()
         click.echo()
@@ -301,12 +322,13 @@ def run_interactive(
                 context_lines.append("  None")
 
             task = "\n".join(context_lines) + "\n"
-            if os.getenv("MODAIC_ENV") == "dev":
-                with open("debug.txt", "w") as f:
-                    f.write(task + "\n")
 
             click.echo(f"\n{CYAN}⏺{RESET} Thinking...", nl=True)
-            result = agent(task=task)
+            try:
+                result = agent(task=task)
+            except Exception as e:
+                click.echo(f"\n{RED}⏺ Error: {e}{RESET}")
+                continue
 
             click.echo(f"\n{CYAN}⏺{RESET} {render_markdown(result.answer)}")
 
@@ -352,8 +374,17 @@ def run_task(
     api_base: str = typer.Option(
         "https://openrouter.ai/api/v1", "--api-base", help="Override API base URL."
     ),
+    track_trace: bool = typer.Option(
+        False, "--track-trace", help="Enable trace tracking."
+    ),
     verbose: bool = typer.Option(
         False, "--verbose", "-v", help="Enable verbose logging."
+    ),
+    wandb_project: str | None = typer.Option(
+        None, "--wandb-project", help="Set Weights & Biases project name."
+    ),
+    wandb_key: str | None = typer.Option(
+        None, "--wandb-key", help="Set Weights & Biases API key."
     ),
     env: Literal["dev", "prod"] = typer.Option(
         os.getenv("MODAIC_ENV", os.getenv("MICROCODE_ENV", "prod")),
@@ -374,6 +405,9 @@ def run_task(
         api_base=api_base,
         verbose=verbose,
         env=env,
+        track_trace=track_trace,
+        wandb_project=wandb_project,
+        wandb_key=wandb_key,
     )
     result = agent(task=prompt)
     click.echo(result.answer)
@@ -401,8 +435,17 @@ def cli(
     api_base: str = typer.Option(
         "https://openrouter.ai/api/v1", "--api-base", help="Override API base URL."
     ),
+    track_trace: bool = typer.Option(
+        False, "--track-trace", help="Enable trace tracking."
+    ),
     verbose: bool = typer.Option(
         False, "--verbose", "-v", help="Enable verbose logging."
+    ),
+    wandb_project: str | None = typer.Option(
+        None, "--wandb-project", help="Set Weights & Biases project name."
+    ),
+    wandb_key: str | None = typer.Option(
+        None, "--wandb-key", help="Set Weights & Biases API key."
     ),
     env: Literal["dev", "prod"] = typer.Option(
         os.getenv("MODAIC_ENV", os.getenv("MICROCODE_ENV", "prod")),
@@ -433,6 +476,9 @@ def cli(
         max_output_chars: Maximum number of output characters
         api_base: Override for the API base URL
         verbose: Enable verbose logging
+        track_trace: Enable trace tracking
+        wandb_project: Set Weights & Biases project name
+        wandb_key: Set Weights & Biases API key
         env: Set the environment (dev or prod)
         history_limit: History size limit
         no_banner: Disable the startup banner
@@ -457,6 +503,10 @@ def cli(
         os.environ["MICROCODE_API_BASE"] = api_base
     if api_key:
         os.environ["OPENROUTER_API_KEY"] = api_key
+    if wandb_project:
+        os.environ["WANDB_PROJECT"] = wandb_project
+    if wandb_key:
+        os.environ["WANDB_API_KEY"] = wandb_key
     if no_banner:
         os.environ["MICROCODE_NO_BANNER"] = "1"
 
@@ -474,10 +524,19 @@ def cli(
         api_base=api_base,
         verbose=verbose,
         env=env,
+        track_trace=track_trace,
+        wandb_project=wandb_project,
+        wandb_key=wandb_key,
     )
 
 
 def main() -> None:
+    # Clear modaic cache on startup
+    modaic_cache = os.path.expanduser("~/.cache/modaic")
+    if os.path.exists(modaic_cache):
+        if os.getenv("MODAIC_ENV") == "dev":
+            click.echo("Resetting Modaic Cache...")
+        shutil.rmtree(modaic_cache)
     app()
 
 

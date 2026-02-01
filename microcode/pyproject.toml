@@ -1,6 +1,6 @@
 [project]
 name = "microcode"
-version = "0.2.1"
+version = "0.2.2"
 description = "Minimal Terminal Agent powered by RLMs"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,6 +14,7 @@ dependencies = [
     "rich>=14.2.0",
     "textual>=7.3.0",
     "typer>=0.21.1",
+    "weave>=0.52.25",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

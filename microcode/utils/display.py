@@ -190,6 +190,8 @@ def print_banner(
     max_tokens: int | None,
     max_output_chars: int | None,
     verbose: bool | None,
+    track_trace: bool | None,
+    wandb_project: str | None,
 ) -> None:
     """
     Print the startup banner with current configuration.
@@ -203,6 +205,8 @@ def print_banner(
         max_tokens: Maximum number of tokens
         max_output_chars: Maximum number of output characters
         verbose: Enable verbose logging
+        track_trace: Enable trace tracking
+        wandb_project: Set Weights & Biases project name
     """
     art_lines = BANNER_ART.splitlines()
     while art_lines and not art_lines[0].strip():
@@ -244,6 +248,8 @@ def print_banner(
         "",
         f"{DIM}Settings:{RESET}",
         f"  {DIM}verbose:{RESET} {format_setting(verbose)}",
+        f"  {DIM}track_trace:{RESET} {format_setting(track_trace)}",
+        f"  {DIM}wandb_project:{RESET} {format_setting(wandb_project)}",
         f"  {DIM}cwd:{RESET} {cwd}",
         "",
         f"{DIM}Quick commands:{RESET}",
