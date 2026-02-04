@@ -40,6 +40,21 @@ curl -fsSL https://deno.land/install.sh | sh
 brew install deno
 ```
 
+- [ripgrep](https://github.com/BurntSushi/ripgrep) (fast file search)
+
+Install ripgrep with one of the following:
+
+```bash
+brew install ripgrep
+```
+
+For Debian/Ubuntu:
+
+```bash
+curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep_14.1.1-1_amd64.deb
+sudo dpkg -i ripgrep_14.1.1-1_amd64.deb
+```
+
 ### Install via uv (recommended)
 
 ```bash
