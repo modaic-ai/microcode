@@ -10,7 +10,11 @@ Microcode is an efficient terminal-based AI agent with an internal REPL environm
 **Warning:** Microcode is currently in beta and does not yet have the standard guardrails (suching as asking the user to accept changes) as production coding agents. Use at your own risk.
 <p></p>
 <p></p>
+
+
 ![Microcode](assets/microcode.png)
+
+
 <p></p>
 <p></p>
 ## Features
