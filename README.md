@@ -8,9 +8,9 @@
 Microcode is an efficient terminal-based AI agent with an internal REPL environment for coding assistance. It leverages Reasoning Language Models (RLMs) to help developers with coding tasks directly from the command line. Because we are solely using RLMs, it can handle extra large code snippets, file contents, and pasted content without dumping it directly into the context window. **Try running with the --verbose flag to view the trajectories, or the "internal monologue" of the agent.**
 
 **Warning:** Microcode is currently in beta and does not yet have the standard guardrails (suching as asking the user to accept changes) as production coding agents. Use at your own risk.
-
+<br/>
 ![Microcode](assets/microcode.png)
-
+<br/>
 ## Features
 
 - **Verbose Output** - Enable verbose output for debugging
