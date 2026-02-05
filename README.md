@@ -1,4 +1,4 @@
-![Octopus](assets/octopus.png)
+![Octopus](assets/octopus_banner.png)
 
 <p></p>
 <p></p>
@@ -16,7 +16,7 @@ Microcode is an efficient terminal-based AI agent with an internal REPL environm
 <p></p>
 <p></p>
 
-![Microcode](assets/microcode.png)
+![Microcode](assets/microcode_example.png)
 
 <p></p>
 <p></p>
