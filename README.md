@@ -11,12 +11,11 @@ Microcode is an efficient terminal-based AI agent with an internal REPL environm
 <p></p>
 <p></p>
 
-
 ![Microcode](assets/microcode.png)
 
+<p></p>
+<p></p>
 
-<p></p>
-<p></p>
 ## Features
 
 - **Verbose Output** - Enable verbose output for debugging
