@@ -1,3 +1,8 @@
+![Octopus](assets/octopus.png)
+
+<p></p>
+<p></p>
+
 # Microcode
 > Minimal Terminal Agent powered by RLMs
 
