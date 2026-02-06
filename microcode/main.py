@@ -130,7 +130,7 @@ def init_agent(
         verbose=verbose,
     )
 
-    agent = AutoProgram.from_precompiled(
+    agent = AutoProgram.from_precompiled( # RLM Engine: https://www.modaic.dev/farouk1/nanocode
         MODAIC_REPO_PATH,
         rev=os.getenv("MODAIC_ENV", "prod"),
         config=config,
